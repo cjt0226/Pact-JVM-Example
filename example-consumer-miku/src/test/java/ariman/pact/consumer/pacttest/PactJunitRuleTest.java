@@ -1,5 +1,7 @@
-package ariman.pact.consumer;
+package ariman.pact.consumer.pacttest;
 
+import ariman.pact.consumer.Information;
+import ariman.pact.consumer.ProviderService;
 import au.com.dius.pact.consumer.dsl.PactDslWithProvider;
 import au.com.dius.pact.consumer.junit.PactProviderRule;
 import au.com.dius.pact.consumer.junit.PactVerification;
