@@ -1,5 +1,6 @@
 package ariman.pact.consumer;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -19,10 +20,12 @@ public class ProviderService {
         this.backendURL = URLBase+"/information?name="+name;
     }
 
-    public Information getInformation() {
-        RestTemplate restTemplate = new RestTemplate();
-        Information information = restTemplate.getForObject(getBackendURL(), Information.class);
+    @Autowired
+    private RestTemplate restTemplate;
 
+    public Information getInformation() {
+//        RestTemplate restTemplate = new RestTemplate();
+        Information information = restTemplate.getForObject(getBackendURL(), Information.class);
         return information;
     }
 }
