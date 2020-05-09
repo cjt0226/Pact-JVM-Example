@@ -1,5 +1,8 @@
 buildscript {
     repositories {
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
         mavenLocal()
         jcenter()
         mavenCentral()
@@ -8,42 +11,125 @@ buildscript {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
         classpath("org.thymeleaf:thymeleaf:3.0.8.RELEASE")
         classpath("au.com.dius:pact-jvm-provider-gradle:4.0.3")
+        classpath("net.serenity-bdd:serenity-gradle-plugin:2.2.2")
+        classpath "io.freefair.gradle:lombok-plugin:5.0.1"
+//        classpath 'org.unbroken-dome.gradle-plugins:gradle-testsets-plugin:3.0.1'
     }
 }
 
 allprojects {
-  apply plugin: 'java'
-  apply plugin: 'idea'
-  apply plugin: 'jacoco'
+    apply plugin: 'java'
+    apply plugin: 'idea'
+    apply plugin: 'jacoco'
+    apply plugin: "io.freefair.lombok"
+//    apply plugin: "org.unbroken-dome.test-sets"
 
-  repositories {
-     mavenCentral()
-  }
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
-  apply plugin: 'org.springframework.boot'
+    apply plugin: 'org.springframework.boot'
+//    apply plugin: 'org.unbroken-dome.test-sets'
 
-  sourceCompatibility = 1.8
-  targetCompatibility = 1.8
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
 
-  dependencies {
-      implementation("org.springframework.boot:spring-boot-starter-web")
-      implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
-      implementation("org.springframework.boot:spring-boot-devtools")
-      testImplementation('org.springframework.boot:spring-boot-starter-test')
-      testImplementation("junit:junit")
-      testImplementation("au.com.dius:pact-jvm-consumer-junit:4.0.3")
-      testImplementation("au.com.dius:pact-jvm-consumer-java8:4.0.3")
-      testCompile "org.mockito:mockito-core:2.+"
-      testImplementation 'org.hamcrest:hamcrest:2.+'
-      compileOnly 'org.projectlombok:lombok:1.+'
-      annotationProcessor 'org.projectlombok:lombok:1.+'
-      testCompileOnly 'org.projectlombok:lombok:1.+'
-      testAnnotationProcessor 'org.projectlombok:lombok:1.+'
-      implementation("io.springfox:springfox-swagger2:2.+")
-      implementation("io.springfox:springfox-swagger-ui:2.+")
-  }
+//https://bintray.com/serenity/maven/
+    project.ext {
+        serenityVersion = '2.2.2'
+        cucumberVersion = '5.6.0'
+        seleniumVersion = '3.141.59'
+        mockitoVersion = '2.+'
+        hamcrestVersion = '2.+'
+        bytebuddyVersion = '1.+'
+        jsonpathVersion = '2.4'
+    }
+
+    ext['selenium.version'] = project.seleniumVersion
+//    ext['json-path.version'] = project.jsonpathVersion
+//    ext['mockito.version'] = project.mockitoVersion
+//    ext['byte-buddy.version'] = project.bytebuddyVersion
+//    ext['hamcrest.version'] = project.hamcrestVersion
+
+
+    dependencies {
+        implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+        implementation("org.springframework.boot:spring-boot-devtools")
+        testImplementation('org.springframework.boot:spring-boot-starter-test')
+        testImplementation("junit:junit:4.13")
+        testImplementation("au.com.dius:pact-jvm-consumer-junit:4.0.3"){
+            transitive false
+        }
+        testImplementation("au.com.dius:pact-jvm-consumer-java8:4.0.3"){
+            transitive false
+        }
+        testImplementation("org.mockito:mockito-core:${project.mockitoVersion}")
+        testImplementation "org.hamcrest:hamcrest:${project.hamcrestVersion}"
+        //integrationTest时RequiredArgsConstructor无法初始化默认构造器，因为Dependencies里比test的少了lombok（Compile），改为使用plugin后正常
+//        compileOnly 'org.projectlombok:lombok:1.+'
+//        annotationProcessor 'org.projectlombok:lombok:1.+'
+//        testCompileOnly 'org.projectlombok:lombok:1.+'
+//        testAnnotationProcessor 'org.projectlombok:lombok:1.+'
+        implementation("io.springfox:springfox-swagger2:2.+"){
+//            exclude group: 'com.google.guava', module: 'guava'
+        }
+        implementation("io.springfox:springfox-swagger-ui:2.+"){
+//            exclude group: 'com.google.guava', module: 'guava'
+        }
+
+        //BDD
+        //Serenity
+        testImplementation("net.serenity-bdd:serenity-core:${project.serenityVersion}") {
+            //排除hamcrest传递依赖
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+            //指定禁止传递依赖
+//              transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-screenplay:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-rest-assured:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-screenplay-rest:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-screenplay-webdriver:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-cucumber5:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-spring:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-ensure:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        testImplementation("net.serenity-bdd:serenity-model:${project.serenityVersion}") {
+            exclude group: 'org.hamcrest', module: 'hamcrest'
+//            transitive false
+        }
+        //Cucumber
+        testImplementation ("io.cucumber:cucumber-core:${project.cucumberVersion}"){
+//            transitive false
+        }
+        testImplementation ("io.cucumber:cucumber-java8:${project.cucumberVersion}"){
+//            transitive false
+        }
+
+    }
+
 
 }
 
@@ -53,7 +139,7 @@ project(':example-consumer-miku') {
 
     jar {
         archiveBaseName = 'example-consumer-miku'
-        archiveVersion =  '1.0.0'
+        archiveVersion = '1.0.0'
     }
 
     test {
@@ -62,7 +148,7 @@ project(':example-consumer-miku') {
     }
 
 //    task pactTest(type: Test, dependsOn: test){
-    task pactTest(type: Test){
+    task pactTest(type: Test) {
         dependsOn(test)
         systemProperties['pact.rootDir'] = "$rootDir/Pacts/Miku"
         include('**/pacttest/*.class')
@@ -86,13 +172,13 @@ project(':example-consumer-miku') {
         dependsOn(pactTest)
     }
 
-    task jacocoPactTestReport(type: JacocoReport){
+    task jacocoPactTestReport(type: JacocoReport) {
         sourceSets sourceSets.main
         executionData pactTest
     }
 
     //Unit Test and pact Test Code coverage all together
-    task jacocoAllTestReport(type: JacocoReport){
+    task jacocoAllTestReport(type: JacocoReport) {
         sourceSets sourceSets.main
         executionData test, pactTest
     }
@@ -101,7 +187,7 @@ project(':example-consumer-miku') {
 project(':example-consumer-nanoha') {
     jar {
         archiveBaseName = 'example-consumer-nanoha'
-        archiveVersion =  '1.0.0'
+        archiveVersion = '1.0.0'
     }
 
     test {
@@ -113,12 +199,23 @@ import java.net.URL
 
 project(':example-provider') {
     apply plugin: 'au.com.dius.pact'
+    apply plugin: 'net.serenity-bdd.aggregator'
+
 
     jar {
         archiveBaseName = 'example-provider'
-        archiveVersion =  '1.0.0'
+        archiveVersion = '1.0.0'
     }
-
+//    configurations.all {
+//        Configuration configuration ->
+//            //当遇到版本冲突时直接构建失败
+//            configuration.resolutionStrategy.failOnVersionConflict()
+////        resolutionStrategy {
+//            //当遇到版本冲突时强制指定一个版本
+////            force "io.cucumber:cucumber-core:4.8.0"
+////            force 'org.assertj:assertj-core:2.6.0'
+////        }
+//    }
     pact {
         reports {
             defaultReports() // adds the standard console output
@@ -160,6 +257,47 @@ project(':example-provider') {
             }
         }
     }
+    // 使用默认的src/test, testCompile
+//    test {
+//        include('**/ProviderTestSuite.class')
+//    }
+
+    //添加integrationTest sourceSet 使用src/integrationTest, integrationTestCompile
+    sourceSets {
+        integrationTest {
+            // not necessary but nice for IDEa's
+            java
+            resources
+
+            compileClasspath += sourceSets.main.output
+            runtimeClasspath += sourceSets.main.output
+        }
+    }
+
+    configurations {
+        integrationTestImplementation.extendsFrom testImplementation
+        integrationTestRuntimeOnly.extendsFrom runtimeOnly
+//        integrationTestImplementation.extendsFrom test
+    }
+
+
+    task integrationTest(type: Test) {
+        include('**/ProviderTestSuite.class')
+//        systemProperty "serenity.project.name", "Provider Acceptance Test"
+        // Runs tests from src/integrationTest
+        testClassesDirs = sourceSets.integrationTest.output.classesDirs
+        classpath = sourceSets.integrationTest.runtimeClasspath
+    }
+
+
+//    integrationTest.dependsOn test
+    integrationTest.finalizedBy(aggregate)
+
+//        test.finalizedBy(aggregate)
+
+    gradle.startParameter.continueOnFailure = true
+
+
 
 }
 
